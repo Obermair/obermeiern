@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="de">
+	<head>
+		<meta charset="utf-8">
+		<title>MAEXCHEN</title>
+		<link rel="stylesheet" type="text/css" href="_css/style.css" title="style">
+		<link href="https://fonts.googleapis.com/css?family=Megrim" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+		<script type='text/javascript' src='js/jquery.particleground.js'></script>
+		<script type='text/javascript' src='js/demo.js'></script>
+		<script src="https://code.jquery.com/jquery-3.2.0.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<link rel="shortcut icon" type="image/x-icon" href="images/wave.png"/>
+		 
+	</head>
+	<body>
+	<div id="page"> 
+	<div id="splash">
+		<div id="intro">
+		<h1>Obermeiern</h1>
+		<div id="text">
+		<p>Würfellügen auch Mäxchen und Obermeiern ist ein kleines Minispiel. Es wird mit zwei Würfeln gespielt, einem Würfelbecher und praktischerweise einem Untersetzer. Gewürfelt
+wird reihum. Der Würfelnde kann den Würfelbecher ankippen und seinen Wurf verdeckt ansehen. Dabei
+sagt er den Wert des Wurfes an - hier darf er frei lügen, so er möchte. Wenn er die Runde nicht begonnen
+hat, muss der angesagte Wert höher sein als der des Vorspielers. Anschließend reicht er die vom Becher
+verdeckten Würfel an den nächsten Spieler weiter.</p>
+		</div>
+		<button id="first" class="button">Spiel starten</button>
+		</div>
+	</div>
+	<div id="anlegen">
+	<div id="oberflaeche">
+
+		<form name="play" id="play">
+			<h2>Spieleranzahl: </h2>
+					<select class="player" name="myPlayer" onchange="spieleranzahl()">
+						<option id="zwei" value="-">-</option>
+						<option id="zwei" value="2">2</option>
+						<option id="drei" value="3">3</option>
+						<option id="vier" value="4">4</option>
+						<option id="fünf" value="5">5</option>
+						<option id="eins" value="6">6</option>
+					</select>
+					
+					<h2 id="names"></h2>
+					
+					<div id="inputs" name="inputs"></div>
+					
+					<div id="buttonBox"><p></p></div>
+				
+		</form>
+	</div>
+	</div>
+	
+	<div id="main">
+		<div id="black">
+		
+		<div id="inter"></div>
+		<div id="face"></div>
+		<div id="herz"></div>
+		
+		</div>
+		</div>
+		
+		<div id='wrap'>
+		  <div class='die'>
+			<div class='die-inner' data-roll='1'>
+			  <div class='die-side'></div>
+			  <div class='die-side'></div>
+			  <div class='die-side'></div>
+			  <div class='die-side'></div>
+			  <div class='die-side'></div>
+			  <div class='die-side'></div>
+			</div>
+		  </div>
+		  <div class='die'>
+			<div class='die-inner' data-roll='2'>
+			  <div class='die-side'></div>
+			  <div class='die-side'></div>
+			  <div class='die-side'></div>
+			  <div class='die-side'></div>
+			  <div class='die-side'></div>
+			  <div class='die-side'></div>
+			</div>
+		  </div>
+		  <div class='die'></div>
+		</div>
+		
+		<div id="throw">
+		<button class="fetch" onclick="begin();">Starten</button>
+		</div>
+	
+		<footer id="footer">
+		
+		<p id="foottext">Copyright  © David Obermair 2018. All rights reserved</p>
+		
+		</footer>
+	 </div>
+
+	<script>
+		if(screen.height <= 920) 
+		{
+		document.write("<style>body{zoom:75%;}</style>");
+		}
+	
+		//Globale Variablen
+		var doc; 
+		var spielername = new Array(doc);
+		var leben = new Array(doc);
+		var z = 0;
+		//gewürfelte Zahl
+		var wert;
+		//abzug
+		var turn;
+		var ncorrect;
+		//neuerZug?
+		var newMatch;
+		//lastValue;
+		var lastValue;
+		//Anfangsspieleranzahl
+		var spieleranzahlBegin;
+		//Wer hat als letzter gewürfelt?
+		var lastPlayer;
+		//Darstellung der Würel
+		var cover = new Array();
+		
+	    //splashscreen
+        $("#first").click(function() {
+            $("#splash").animate({
+                opacity: 0.8,
+                marginLeft: "-150vw"
+            }, {
+                duration: 2200,
+                complete: function() {
+                    $("#splash").hide();
+                }
+            });
+        });
+		
+        //s2
+		$("#buttonBox").click(function() {
+          $("#anlegen").animate({
+                opacity: 0.8,
+                 marginTop: "-150vh"
+            }, {
+                duration: 2200,
+                complete: function() {
+                    $("#anlegen").hide();
+                }
+            });
+		});
+		 
+		
+		 
+		//spieleranzahl
+		function spieleranzahl() {
+			  
+			 doc = document.play.myPlayer.value; 
+			 spieleranzahlBegin = doc;
+			 document.getElementById("buttonBox").innerHTML = "";
+			 document.getElementById("names").innerHTML = "";
+			 document.getElementById("inter").innerHTML = "";
+			 
+ 
+			 document.getElementById("names").innerHTML += "<br><br><br>Spielernamen:";
+  			
+			
+			  switch(doc){
+				case "2":
+					document.getElementById("inputs").innerHTML = '<input type="text" id="player1" name="player1" value="Spieler 1"><br><input type="text" id="player2" name="player2" value="Spieler 2"><br>';
+				    document.getElementById("herz").innerHTML ='<div id="herz-inside1"></div><div id="herz-inside2"></div>';
+	
+					break;
+				case "3":
+					document.getElementById("inputs").innerHTML = '<input type="text" id="player1" name="player1" value="Spieler 1"><br><input type="text" id="player2" name="player2" value="Spieler 2"><br><input type="text" id="player3" name="player3" value="Spieler 3"><br>';
+					document.getElementById("herz").innerHTML = '<div id="herz-inside1"></div><div id="herz-inside2"></div><div id="herz-inside3"></div>';
+					break;
+				case "4":
+					document.getElementById("inputs").innerHTML = '<input type="text" id="player1" name="player1" value="Spieler 1"><br><input type="text" id="player2" name="player2" value="Spieler 2"><br><input type="text" id="player3" name="player3" value="Spieler 3"><br><input type="text" id="player4" name="player4" value="Spieler 4"><br>';
+					document.getElementById("herz").innerHTML = '<div id="herz-inside1"></div><div id="herz-inside2"></div><div id="herz-inside3"></div><div id="herz-inside4"></div>';
+					break;
+			    case "5":
+					document.getElementById("inputs").innerHTML = '<input type="text" id="player1" name="player1" value="Spieler 1"><br><input type="text" id="player2" name="player2" value="Spieler 2"><br><input type="text" id="player3" name="player3" value="Spieler 3"><br><input type="text" id="player4" name="player4" value="Spieler 4"><br><input type="text" id="player5" name="player5" value="Spieler 5"><br>';
+					document.getElementById("herz").innerHTML = '<div id="herz-inside1"></div><div id="herz-inside2"></div><div id="herz-inside3"></div><div id="herz-inside4"></div><div id="herz-inside5"></div>';
+					break;
+				case "6":
+					document.getElementById("inputs").innerHTML = '<input type="text" id="player1" name="player1" value="Spieler 1"><br><input type="text" id="player2" name="player2" value="Spieler 2"><br><input type="text" id="player3" name="player3" value="Spieler 3"><br><input type="text" id="player4" name="player4" value="Spieler 4"><br><input type="text" id="player5" name="player5" value="Spieler 5"><br><input type="text" id="player6" name="player6" value="Spieler 6"><br>';
+					document.getElementById("herz").innerHTML = '<div id="herz-inside1"></div><div id="herz-inside2"></div><div id="herz-inside3"></div><div id="herz-inside4"></div><div id="herz-inside5"></div><div id="herz-inside6"></div>';
+					break; 
+			 }
+			 
+			 document.getElementById("buttonBox").innerHTML += '<div onclick="myName()" class="base">Spiel anlegen</div>';
+			 
+			 for(var i = 0; i < doc; i++){
+			 document.getElementById("inter").innerHTML += '<img src="images/face.png" id="smile" alt="smiley">';
+			 
+			 }
+			 
+		}
+		
+		function myName(){
+			
+			doc = document.play.myPlayer.value; 
+			
+			for(var j = 0; j < doc; j++){		
+			
+			spielername[j] = document.getElementById("player" + (j+1)).value;
+			leben[j] = 3;
+			 
+			
+			}
+			
+			document.getElementById("inter").innerHTML += "<br>";
+			
+			for(var k = 0; k < doc; k++){
+			document.getElementById("face").innerHTML += '<div id="untertitel">' + spielername[k] + '</div>';
+				for(var u = 0; u < leben[k]; u++){
+					 document.getElementById("herz-inside"+ (k+1)).innerHTML += '<img src="images/herz.png" id="herz-inside-input" alt="herz">';
+				}
+			}
+			
+		}
+		
+		function begin(){
+		
+			document.getElementById("throw").innerHTML = "";
+		
+			document.getElementById("throw").innerHTML += spielername[z] + ' ist an der Reihe!';
+	
+			newMatch = true;
+			turn = 0;
+	
+			document.getElementById("throw").innerHTML += '<button id="wb" class="normal" onclick="wurfelnBegin();">Würfeln</button>';
+		
+		}
+		
+		function wurfelnBegin(){
+			
+			var gesamt, hay, lie;
+			var run = 0;
+			
+			document.getElementById("throw").innerHTML  = "";
+			
+			var zahl1 = (Math.random() * 5);
+            zahl1 = Math.round(zahl1) + 1;
+			cover[0] = zahl1;
+			
+			
+			var zahl2 = (Math.random() * 5);
+            zahl2 = Math.round(zahl2) + 1;
+			cover[1] = zahl2;
+			
+			$(document).ready(function(e) {
+			  e.preventDefault;
+			  $('.die').each(function() {
+				var result = cover[run];
+				run++;
+				$(this).find('.die-inner').attr('data-roll', result);
+			  });
+			});
+			
+			
+			if(zahl1 > zahl2){
+				document.getElementById("throw").innerHTML += 'Du hast '+ (zahl1) + (zahl2) + ' gewürfelt.';
+				wert = (zahl1.toString()) + (zahl2.toString());
+			}			
+			
+			if(zahl1 == zahl2){
+				document.getElementById("throw").innerHTML += 'Du hast einen '+ zahl1 + 'er Pasch gewürfelt.';
+				wert = (zahl1.toString()) + (zahl1.toString());
+			}
+			if(zahl2 > zahl1){
+				document.getElementById("throw").innerHTML += 'Du hast '+ (zahl2) + (zahl1) + ' gewürfelt.';
+				wert = (zahl2.toString()) + (zahl1.toString());
+			}
+	
+			if((zahl1+zahl2) == 3){
+				if(zahl1 > zahl2){
+				document.getElementById("throw").innerHTML += ' MEIER!!!!';
+				wert = (zahl1.toString()) + (zahl2.toString());
+				}
+				else{
+				document.getElementById("throw").innerHTML += ' MEIER!!!!';
+				wert = (zahl2.toString()) + (zahl1.toString());
+				}
+			}
+			
+			full = wertetabelle(wert);
+            
+			lastPlayer = z;
+			
+			if((z+1) == doc){
+			z = -1;
+			}
+			
+			document.getElementById("throw").innerHTML += '<br>Was sagst du dem nächsten Spieler für eine Zahl?';
+			
+			if(!newMatch){
+				document.getElementById("throw").innerHTML += '<br><br>Du benötigst eine höhere Zahl als '+ turn + ' sonst verlierst du ein Leben!';
+			}
+			else{
+				newMatch = false;
+				lastValue = -1;
+			}
+			
+			document.getElementById("throw").innerHTML += '<br><br><input type="text" id="ubergabe" name="ubergabe" value="">';
+			
+			document.getElementById("throw").innerHTML += '<div onclick="main(full)" class="normal">Weiter</div>';
+		
+		}
+		
+		function main(full){
+			
+			var lie;
+			var lastNumber;
+			var run = 0;
+			
+			lastValue = turn;
+			
+			turn = document.getElementById("ubergabe").value;
+			
+			cover[0] = turn.charAt(0);
+			cover[1] = turn.charAt(1);
+			
+			 
+			document.getElementById("throw").innerHTML  = "";
+			
+			
+			for(var j = 0; j < doc; j++){		
+			spielername[j] = document.getElementById("player" + (j+1)).value;
+			}
+			
+			lie = wertetabelle(turn);
+			lastNumber = wertetabelle(lastValue);
+		
+			if(lie == -1){
+				lie = full;
+				turn = wert;
+				alert("Keine korrekte Eingabe! Es wird von keiner Lüge ausgegangen!");
+			}
+			else{
+			$(document).ready(function(e) {
+			  e.preventDefault;
+			  $('.die').each(function() {
+				var result = cover[run];
+				run++;
+				$(this).find('.die-inner').attr('data-roll', result);
+			  });
+			});
+			}
+			
+			
+			//Lüge?
+			if(lie != full){
+				ncorrect = true;
+			}
+			else{
+				ncorrect = false;
+			}
+			
+		 
+			//allg. Spielablauf!
+			do{
+			z++;
+            
+            if(z == doc){
+			z = 0;
+			}
+			}
+			while(leben[z] == 0);
+			
+			
+				if(lastNumber >= lie){
+					document.getElementById("throw").innerHTML += 'Du hättest eine Zahl sagen müssen, die größer als ' + lastValue + ' ist.';
+					
+					leben[lastPlayer]--;
+						
+					if(leben[lastPlayer] == 0){
+						document.getElementById("throw").innerHTML += "<br><br><h2>" + spielername[lastPlayer] + " ist ausgeschieden!</h2>";
+						
+					}
+					else{
+						document.getElementById("throw").innerHTML += "<br><br><h2>" + spielername[lastPlayer] + " bekommt ein Leben Abzug!</h2>";
+					}
+					 
+					
+					drawLifes();
+					var gesamt = 0; 
+			 
+					for(var n = 0; n < spieleranzahlBegin;n++){
+					if(leben[n] == 0){
+					gesamt++;
+					}
+			
+					}
+					if(spieleranzahlBegin-1 == gesamt){
+						document.getElementById("throw").innerHTML  = "";
+				
+						document.getElementById("throw").innerHTML += "<br><br><h2>Das Spiel ist vorbei! </h2><br>" + spielername[z] + " hat gewonnen!</h2>";
+						
+						document.getElementById("throw").innerHTML += '<div onclick="location.reload()"" class="normal">Nocheinmal spielen</div>';
+					
+					}
+					else{
+					document.getElementById("throw").innerHTML += '<div onclick="begin()" class="normal">Weiter</div>';
+					}
+				
+				}
+				else{
+				
+					document.getElementById("throw").innerHTML += spielername[z] + ' ist an der Reihe! <br>';
+			
+					
+					document.getElementById("throw").innerHTML += spielername[lastPlayer] + ' hat dir die Zahl ' + turn + ' gesagt. Glaubst du ihm?';
+					
+							
+					document.getElementById("throw").innerHTML += '<div onclick="wurfelnBegin()" class="normal">Würfeln</div>';
+					
+					document.getElementById("throw").innerHTML += '<div onclick="look()" class="normal">Nachschauen</div>';
+			
+				}	
+		}
+		
+		
+		function look(){
+			
+			document.getElementById("throw").innerHTML  = "";
+			
+			if(!ncorrect){
+				
+				document.getElementById("throw").innerHTML += spielername[lastPlayer] + " hat nicht gelogen! <br>";
+				document.getElementById("throw").innerHTML += spielername[lastPlayer] + " hat "+ wert + " gewürfelt und hat dir "+ turn + " gesagt.";
+				
+				leben[z]--;
+				
+				if(leben[z] == 0){
+					document.getElementById("throw").innerHTML += "<br><br><h2>" + spielername[z] + " ist ausgeschieden!</h2>";		
+				}
+				else{
+					document.getElementById("throw").innerHTML += "<br><br><h2>" + spielername[z] + " bekommt ein Leben Abzug!</h2>";
+				}
+				
+				drawLifes();
+				
+			}
+			else{
+				
+				
+				document.getElementById("throw").innerHTML += spielername[lastPlayer] + " hat gelogen!<br>";
+				document.getElementById("throw").innerHTML += spielername[lastPlayer] + " hat "+ wert + " gewürfelt und hat dir "+ turn + " gesagt.";
+				
+				leben[lastPlayer]--;
+				
+				if(leben[lastPlayer] == 0){
+						document.getElementById("throw").innerHTML += "<br><br><h2>" + spielername[lastPlayer] + " ist ausgeschieden!</h2>";
+					
+				}
+				else{
+					document.getElementById("throw").innerHTML += "<br><br><h2>" + spielername[lastPlayer] + " bekommt ein Leben Abzug!</h2>";
+				}
+				
+				drawLifes();
+				
+			}
+			
+			do{
+			z++;
+            
+            if(z == doc){
+			z = 0;
+			}
+			}
+			while(leben[z] == 0);
+
+			var gesamt = 0; 
+			 
+			for(var n = 0; n < spieleranzahlBegin ;n++){
+				if(leben[n] == 0){
+				gesamt++;
+				}
+			
+			}
+			if(spieleranzahlBegin-1 == gesamt){
+				document.getElementById("throw").innerHTML  = "";
+				
+				document.getElementById("throw").innerHTML += "<br><br><h2>Das Spiel ist vorbei! </h2><br>" + spielername[z] + " hat gewonnen!</h2>";
+				
+				document.getElementById("throw").innerHTML += '<div onclick="location.reload()"" class="normal">Nocheinmal spielen</div>';
+			}
+			else{
+			document.getElementById("throw").innerHTML += '<div onclick="begin()" class="normal">Weiter</div>';
+			}
+			
+		
+		}
+		function drawLifes(){
+		
+		 
+		
+			for(var o = 0; o < spieleranzahlBegin; o++){
+				 document.getElementById("herz-inside"+ (o+1)).innerHTML = "";
+			}
+		
+			for(var k = 0; k < spieleranzahlBegin; k++){
+				 
+				if(leben[k] == 0){
+				document.getElementById("face").innerHTML = "";
+				document.getElementById("inter").innerHTML = "";
+				
+					
+				
+				spielername[k] = "";
+				
+					for(var i = 0; i < spieleranzahlBegin; i++){
+						if(spielername[i] == ""){
+						document.getElementById("inter").innerHTML += '<img src="images/face_lost.png" id="smile" alt="smiley">';
+						}
+						else{
+						document.getElementById("inter").innerHTML += '<img src="images/face.png" id="smile" alt="smiley">';
+						}
+					}
+					
+					for(var o = 0; o < spieleranzahlBegin; o++){
+						document.getElementById("face").innerHTML += '<div id="untertitel">' + spielername[o] + '</div>';
+					
+					} 
+					 
+				}
+				 
+				for(var u = 0; u < leben[k]; u++){
+					var moment;
+					 document.getElementById("herz-inside"+ (k+1)).innerHTML += '<img src="images/herz.png" id="herz-inside-input" alt="herz">';	
+				}
+			}
+			
+			
+		
+		}
+
+		function wertetabelle(wert){
+			
+			var big;
+			
+			switch(wert){
+				case"0":
+					big = 0;
+					break;
+				case"31": 
+					big = 1;
+					break;
+				case"32": 
+					big = 2;
+					break;
+				case "41": 
+					big = 3;
+					break;
+				case "42":
+					big = 4;
+					break;
+				case "43":
+					big = 5;
+					break;
+				case "51":
+					big = 6;
+					break;
+				case "52":
+					big = 7;
+					break;
+				case "53":
+					big = 8;
+					break;
+				case "54":
+					big = 9;
+					break;
+				case "61": 
+					big = 10;
+				case "62":
+					big = 11;
+					break;
+				case "63":
+					big = 12;
+					break;
+				case "64":
+					big = 13;
+					break;
+				case "65":
+					big = 14;
+					break
+				case "11":
+					big = 15;
+					break;
+				case "22":
+					big = 16;
+					break;
+				case "33":
+					big = 17;
+					break;
+				case "44":
+					big = 18;
+					break;
+				case "55":
+					big = 19;
+					break;
+				case "66":
+					big = 20;
+					break;
+				case "21":
+					big = 21;
+					break;
+				default:
+					big = -1;
+					break;
+			}
+			
+			return big;
+		
+		}
+
+		 
+		 
+	</script>
+	</body>
+
+</html>
